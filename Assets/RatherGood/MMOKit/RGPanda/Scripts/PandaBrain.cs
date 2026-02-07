@@ -55,6 +55,7 @@ namespace RatherGood.Panda
             Entity.onNotifyEnemySpottedByAlly += Entity_onNotifyEnemySpottedByAlly;
             Entity.onReceivedDamage += Entity_onReceivedDamage;
 
+            this.InvokeInstanceDevExtMethods("Awake");
         }
 
         public override void EntityOnDestroy()
@@ -63,6 +64,8 @@ namespace RatherGood.Panda
             Entity.onNotifyEnemySpotted -= Entity_onNotifyEnemySpotted;
             Entity.onNotifyEnemySpottedByAlly -= Entity_onNotifyEnemySpottedByAlly;
             Entity.onReceivedDamage -= Entity_onReceivedDamage;
+
+            this.InvokeInstanceDevExtMethods("OnDestroy");
         }
 
 
@@ -79,9 +82,8 @@ namespace RatherGood.Panda
 
         public override void EntityUpdate()
         {
-            base.EntityUpdate();
 
-            //only update from server and if palyers are nearby?
+            //only update from server and if players are nearby?
             if (!Entity.IsServer || Entity.Identity.CountSubscribers() == 0)
                 return;
 
@@ -225,7 +227,7 @@ namespace RatherGood.Panda
         idle,
         patrol,
         //greeting, //greeting (or actions) on first encounter with another entity
-        //interacting, //conversation or trade
+        interacting, //conversation or trade
         alert,
         combat,
         fleeing, //highest priority
