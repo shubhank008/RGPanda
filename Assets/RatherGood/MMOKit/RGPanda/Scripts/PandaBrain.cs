@@ -4,11 +4,14 @@ using UnityEngine;
 using MultiplayerARPG;
 using Panda;
 using System.Collections.Generic;
+using Insthync.UnityEditorUtils;
+using Insthync.DevExtension;
+using Insthync.ManagedUpdating;
 
 namespace RatherGood.Panda
 {
     [RequireComponent(typeof(PandaBehaviour))]
-    public partial class PandaBrain : BaseGameEntityComponent<BaseMonsterCharacterEntity> //: MonsterActivityComponent //
+    public partial class PandaBrain : BaseGameEntityComponent<BaseMonsterCharacterEntity>, IManagedUpdate //: MonsterActivityComponent //
     {
 
 
@@ -44,10 +47,19 @@ namespace RatherGood.Panda
 
         Vector3 EntityPosition => Entity.EntityTransform.position;
 
-        public override void EntityAwake()
+        //New 1.97 UpdateManager system, register for updates when enabled, unregister when disabled
+        protected virtual void OnEnable()
         {
-            base.EntityAwake();
+            UpdateManager.Register(this);
+        }
 
+        protected virtual void OnDisable()
+        {
+            UpdateManager.Unregister(this);
+        }
+
+        protected virtual void Awake()
+        {
             pandaB = GetComponent<PandaBehaviour>();
             pandaB.tickOn = BehaviourTree.UpdateOrder.Manual;
 
@@ -58,21 +70,19 @@ namespace RatherGood.Panda
             this.InvokeInstanceDevExtMethods("Awake");
         }
 
-        public override void EntityOnDestroy()
+        protected override void OnDestroy()
         {
-            base.EntityOnDestroy();
             Entity.onNotifyEnemySpotted -= Entity_onNotifyEnemySpotted;
             Entity.onNotifyEnemySpottedByAlly -= Entity_onNotifyEnemySpottedByAlly;
             Entity.onReceivedDamage -= Entity_onReceivedDamage;
 
             this.InvokeInstanceDevExtMethods("OnDestroy");
+            base.OnDestroy();
         }
 
 
-        public override void EntityStart()
+        public virtual void Start()
         {
-            base.EntityStart();
-
             pandaB.sourceInfos = null;
             pandaB.Apply(); //will set _btSources = null;
             pandaB.Compile();
@@ -80,11 +90,11 @@ namespace RatherGood.Panda
         }
 
 
-        public override void EntityUpdate()
+        public virtual void ManagedUpdate()
         {
 
             //only update from server and if players are nearby?
-            if (!Entity.IsServer || Entity.Identity.CountSubscribers() == 0)
+            if (!Entity.IsServer || Entity.Identity.CountSubscribers() == 0 || CharacterDatabase == null)
                 return;
 
             if (!enableAIBrainUpdate)
@@ -119,6 +129,7 @@ namespace RatherGood.Panda
             if ((Entity.Summoner != null && Entity.Summoner == ally) ||
                 Entity.Characteristic == MonsterCharacteristic.Assist)
             {
+                //Default Kit goes straight to attack logic, allow MonsterAI to execute alert logic
                 TargetEntity = enemy;
                 AiMode = AIModeEnum.combat;
             }
@@ -140,7 +151,6 @@ namespace RatherGood.Panda
                     TargetEntity = attackerCharacter;
                     AiMode = AIModeEnum.combat;
                 }
-
             }
         }
 

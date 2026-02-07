@@ -4,6 +4,7 @@ using UnityEngine;
 using MultiplayerARPG;
 using Panda;
 using Panda.Examples.Shooter;
+using Insthync.UnityEditorUtils;
 
 namespace RatherGood.Panda
 {
@@ -33,7 +34,7 @@ namespace RatherGood.Panda
         public bool Combat_TryGetTargetEntity()
         {
 
-            if ((TargetEntity == null) || TargetEntity.Entity == Entity || TargetEntity.IsHideOrDead() || !TargetEntity.CanReceiveDamageFrom(Entity.GetInfo()))
+            if ((TargetEntity == null) || TargetEntity.Entity == Entity || TargetEntity.IsDeadOrHideFrom(Entity) || !TargetEntity.CanReceiveDamageFrom(Entity.GetInfo()))
             {
                 // If target is dead or in safe area stop attacking
                 Entity.SetTargetEntity(null);
@@ -52,7 +53,7 @@ namespace RatherGood.Panda
             // Random action state to do next time
             if (CharacterDatabase.RandomSkill(Entity, out queueSkill, out queueSkillLevel) && queueSkill != null)
             {
-                if (Entity.IndexOfSkillUsage(queueSkill.DataId, SkillUsageType.Skill) >= 0)
+                if (Entity.IndexOfSkillUsage(SkillUsageType.Skill, queueSkill.DataId) >= 0)
                 {
                     queueSkill = null;
                     queueSkillLevel = 0;
@@ -188,9 +189,9 @@ namespace RatherGood.Panda
             else if (!IsPlayingActionAnimation)
             {
 
-                if (queueSkill != null && Entity.IndexOfSkillUsage(queueSkill.DataId, SkillUsageType.Skill) < 0)
+                if (queueSkill != null && Entity.IndexOfSkillUsage(SkillUsageType.Skill, queueSkill.DataId) < 0)
                 {
-                    attackInProcess = Entity.UseSkill(queueSkill.DataId, false, 0, new AimPosition()
+                    attackInProcess = Entity.UseSkill(queueSkill.DataId, WeaponHandlingState.None, 0, new AimPosition()
                     {
                         type = AimPositionType.Position,
                         position = TargetEntity.OpponentAimTransform.position,
@@ -200,7 +201,7 @@ namespace RatherGood.Panda
                 else
                 {
                     // Attack when no queue skill
-                    bool isLeftHand = false;
+                    WeaponHandlingState isLeftHand = WeaponHandlingState.None;
                     attackInProcess = Entity.Attack(ref isLeftHand);
 
                 }

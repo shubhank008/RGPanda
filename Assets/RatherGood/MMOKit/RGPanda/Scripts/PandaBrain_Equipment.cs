@@ -4,6 +4,7 @@ using UnityEngine;
 using MultiplayerARPG;
 using Panda;
 using Panda.Examples.Shooter;
+using Insthync.UnityEditorUtils;
 
 namespace RatherGood.Panda
 {

@@ -4,6 +4,7 @@ using UnityEngine;
 using MultiplayerARPG;
 using Panda;
 using Panda.Examples.Shooter;
+using Insthync.UnityEditorUtils;
 
 namespace RatherGood.Panda
 {
@@ -73,7 +74,7 @@ namespace RatherGood.Panda
         {
             currentDestination = EntityPosition; //current position
             EntityMovement.StopMove();
-            EntityMovement.SetLookRotation(Entity.GetLookRotation()); //set to current
+            EntityMovement.SetLookRotation(Entity.GetLookRotation(), false); //set to current
             return true;
         }
 
@@ -103,7 +104,7 @@ namespace RatherGood.Panda
                 currentLookRotationEuler.x = 0;
                 currentLookRotationEuler.z = 0;
                 currentLookAtRotation = Quaternion.RotateTowards(currentLookAtRotation, Quaternion.Euler(currentLookRotationEuler), turnToEnemySpeed * Time.deltaTime);
-                Entity.SetLookRotation(currentLookAtRotation);
+                Entity.SetLookRotation(currentLookAtRotation, false);
             }
 
             if (Task.isInspected)
